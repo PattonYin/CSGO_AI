@@ -1,0 +1,16 @@
+key,Key.f2,pressed,1708709517.9480696
+key,Key.f2,released,1708709518.074881
+key,'d',pressed,1708709522.318021
+key,'d',released,1708709522.5451574
+key,'s',pressed,1708709522.6287768
+key,Key.shift,pressed,1708709522.82201
+key,'S',released,1708709523.0311155
+key,'S',pressed,1708709523.0655117
+key,'S',released,1708709523.1512954
+key,'A',pressed,1708709523.2687228
+key,'S',pressed,1708709523.3901067
+key,'A',released,1708709523.6183217
+key,'S',released,1708709523.6412258
+key,Key.shift,released,1708709523.7415483
+key,Key.ctrl_l,pressed,1708709524.8495357
+key,'\x03',pressed,1708709524.883451

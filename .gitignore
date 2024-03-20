@@ -2,6 +2,14 @@
 Counter-Strike_Behavioural_Cloning/
 video_input/screenshots/
 
+# Data
+pose_identification/data_0/
+pose_identification/data_01/
+data/
+
+# Models
+pose_identification/models/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

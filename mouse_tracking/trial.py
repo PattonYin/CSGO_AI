@@ -11,28 +11,40 @@ is_recording = False
 start_key = keyboard.Key.f2  # Start recording when F2 is pressed
 stop_key = keyboard.Key.f3   # Stop recording when F3 is pressed
 
+file_name = "input_tracking.txt"
+
 def on_move(x, y):
     print(f"Mouse moved to ({x}, {y}) at timestamp {time.time()}")
     if is_recording:
         # Save the coordinates to a file
-        with open("mouse_tracking.txt", "a") as file:
-            file.write(f"{x},{y},{time.time()}\n")
+        with open(file_name, "a") as file:
+            file.write(f"mouse,{x},{y},{time.time()}\n")
 
 def on_click(x, y, button, pressed):
     if is_recording:
         action = "pressed" if pressed else "released"
         print(f"Mouse {action} at ({x}, {y}) with {button} at timestamp {time.time()}")
+        with open(file_name, "a") as file:
+            file.write(f"mouse,{x},{y},{button},{action},{time.time()}\n")
 
 def on_press(key):
     global is_recording
+    print(f"Key {key} pressed at timestamp {time.time()}")
     if key == start_key:
         is_recording = True
         print("Started recording data...")
     elif key == stop_key:
         is_recording = False
         print("Stopped recording data...")
-        # Optionally, stop listeners if needed
-        # return False
+    if is_recording:
+        with open(file_name, "a") as file:
+            file.write(f"key,{key},pressed,{time.time()}\n")
+            
+def on_release(key):
+    if is_recording:
+        print(f"Key {key} released at timestamp {time.time()}")
+        with open(file_name, "a") as file:
+            file.write(f"key,{key},released,{time.time()}\n")
 
 if __name__ == "__main__":
     # Start the mouse listener to handle mouse events
@@ -40,7 +52,7 @@ if __name__ == "__main__":
     mouse_listener.start()
 
     # Start the keyboard listener to handle keyboard events
-    keyboard_listener = keyboard.Listener(on_press=on_press)
+    keyboard_listener = keyboard.Listener(on_press=on_press, on_release=on_release)
     keyboard_listener.start()
 
     # Wait for the flag to become True to stop both listeners

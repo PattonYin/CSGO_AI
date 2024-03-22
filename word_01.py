@@ -1,15 +1,15 @@
-import cv2
-from ultralytics import YOLO
-import time
-import win32gui
 import numpy as np
+import cv2
+import time
+
+import win32gui
 import pyautogui
+
+from ultralytics import YOLO
 import torch
 
 from utils import tensor_check
 from video_input.screen_input import grab_window, resolution
-
-
 
 def run_attempt(resolution=resolution, fps=10):
     process_interval = 1/fps

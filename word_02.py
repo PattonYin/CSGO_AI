@@ -48,22 +48,17 @@ def screen_capture(resolution=resolution, fps=10):
                 break
 
     cv2.destroyAllWindows()
-
-    time_end = time.time()
-    avg_time = (time_end-time_start)/n_grabs
-    fps = 1/avg_time
-    print('avg_time',np.round(avg_time,5))
-    print('fps',np.round(fps,2))
     return
-
-
 
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ----------Aiming Section ---------- # 
 # ----------------------------------- # 
 # ----------------------------------- # 
-def aiming(result):
+def aim_at_target(x_target, y_target):
+    mouse.position = (x_target, y_target)
+
+def identify_target(result):
     keypoints = result.keypoints.xy
     if tensor_check.is_empty_and_matches(keypoints):
         ("No agent identified")
@@ -82,7 +77,7 @@ def aiming(result):
             x_target = person_keypoints[3][0]+xy_tuning[0]
             y_target = person_keypoints[3][1]+xy_tuning[1]
             print(f"attempting to flick to {x_target}, {y_target}")
-            mouse.position = (x_target, y_target)
+            aim_at_target(x_target, y_target)
 
 def on_press_flick(key):
     try:
@@ -90,7 +85,7 @@ def on_press_flick(key):
             img = cv2.imread("video_input/temp/temp_02.jpg")
             results = model(img)
             for result in results:
-                aiming(result)
+                identify_target(result)
     except AttributeError:
         print(f'Special key {key} pressed')
 
@@ -127,5 +122,5 @@ def run():
     t2.join()
     
 if __name__ == "__main__":
-    # screen_capture()
-    run()
+    # run()
+    aim_at_target(100,100)

@@ -269,7 +269,7 @@ def get_highest_num(file_name_stub, folder_name):
 # it will crash if try to import key_output on linux etc
 import os
 if os.name == 'nt': # if windows
-    from key_output import HoldKey, ReleaseKey, n_char
+    from utils.key_output import HoldKey, ReleaseKey, n_char
     def wait_for_loop_end(loop_start_time, loop_fps, n_loops=0, is_clear_decals=True):
         # this is added to the end of each loop in game
         # allows to wait until the correct time before releasing

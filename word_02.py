@@ -4,8 +4,7 @@ import time
 import threading
 
 import win32gui
-import pyautogui
-from pynput import keyboard
+from pynput import keyboard, mouse
 
 from ultralytics import YOLO
 import torch
@@ -57,6 +56,8 @@ def screen_capture(resolution=resolution, fps=10):
     print('fps',np.round(fps,2))
     return
 
+
+
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ----------Aiming Section ---------- # 
@@ -81,7 +82,7 @@ def aiming(result):
             x_target = person_keypoints[3][0]+xy_tuning[0]
             y_target = person_keypoints[3][1]+xy_tuning[1]
             print(f"attempting to flick to {x_target}, {y_target}")
-            pyautogui.moveTo(x_target, y_target)
+            mouse.position = (x_target, y_target)
 
 def on_press_flick(key):
     try:
@@ -94,7 +95,6 @@ def on_press_flick(key):
         print(f'Special key {key} pressed')
 
 def on_release(key):
-    print(f'Key {key} released')
     # Stop listener
     if key == keyboard.Key.esc:
         return False    
@@ -108,12 +108,12 @@ def auto_aim():
             on_release=on_release) as listener:
         listener.join()
         
-        
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ------Load model & threading ------ # 
 # ----------------------------------- # 
 # ----------------------------------- # 
+mouse = mouse.Controller()
 model = YOLO('pose_identification/models/YOLOv8l-pose.pt')
 print("model loaded")
 
@@ -126,8 +126,6 @@ def run():
     t1.join()
     t2.join()
     
-
-
 if __name__ == "__main__":
     # screen_capture()
     run()

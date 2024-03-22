@@ -36,11 +36,13 @@ def process_file(file_path):
 for i in range(1, 4):
     file_path = f'mouse_tracking/sample/flicks/{i}.txt'
     normalized_x, normalized_y, relative_times = process_file(file_path)
-
     # plot out the normalized data x-coordinates vs time_gap
     plt.plot(normalized_x, relative_times, marker='o', color='r', ls='')
-    plt.show()
-    # plot out the normalized data y-coordinates vs time_gap
-
+    plt.savefig(f'mouse_tracking/flick_analysis/{i}_x_to_time.png')
+    plt.close()
+    
+    # plot out the normalized data time_gap vs y-coordinates 
     plt.plot(relative_times, normalized_y, marker='o', color='r', ls='')
-    plt.show()
+    plt.savefig(f'mouse_tracking/flick_analysis/{i}_time_to_y.png')
+    plt.close()
+

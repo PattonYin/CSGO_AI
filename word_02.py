@@ -12,14 +12,17 @@ import torch
 from utils import tensor_check
 from video_input.screen_input import grab_window, resolution
 
-xy_tuning = [-28, +39]
+xy_tuning_01 = [-20, +40]
+xy_tuning_02 = [1, 1]
+fps = 10
+model_path = 'pose_identification/models/YOLOv8l-pose.pt'
 
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ------Screen Capture Section ------ # 
 # ----------------------------------- # 
 # ----------------------------------- # 
-def screen_capture(resolution=resolution, fps=10):
+def screen_capture(resolution=resolution, fps=fps):
     process_interval = 1/fps
     hwin = win32gui.FindWindow(None,'Counter-Strike 2') 
     last_time = time.time()
@@ -74,8 +77,8 @@ def identify_target(result):
             continue
         else:
             print("agent identified")
-            x_target = person_keypoints[3][0]+xy_tuning[0]
-            y_target = person_keypoints[3][1]+xy_tuning[1]
+            x_target = person_keypoints[3][0]+xy_tuning_01[0]
+            y_target = person_keypoints[3][1]+xy_tuning_01[1]
             print(f"attempting to flick to {x_target}, {y_target}")
             aim_at_target(x_target, y_target)
 
@@ -109,7 +112,7 @@ def auto_aim():
 # ----------------------------------- # 
 # ----------------------------------- # 
 mouse = mouse.Controller()
-model = YOLO('pose_identification/models/YOLOv8l-pose.pt')
+model = YOLO(model_path)
 print("model loaded")
 
 def run():
@@ -122,5 +125,4 @@ def run():
     t2.join()
     
 if __name__ == "__main__":
-    # run()
-    aim_at_target(100,100)
+    run()

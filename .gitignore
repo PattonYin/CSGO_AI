@@ -5,6 +5,7 @@ video_input/screenshots/
 # Data
 pose_identification/data_*/
 data/
+video_input/temp/
 
 # Models
 pose_identification/models/

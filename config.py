@@ -10,7 +10,8 @@ loop_fps=16 # 16 is main one, but can try to run at 24
 
 # dimensions of image to reduce to
 # used when grabbing screen and also building NN
-csgo_img_dimension = (150,280) # offset_height_top = 135, offset_height_bottom = 135, offset_sides = 100
+csgo_img_dimension = (150+160,280+160) # offset_height_top = 55, offset_height_bottom = 55, offset_sides = 20
+csgo_img_dimension = (590, 1280) # offset_height_top = 0, offset_height_bottom = 0, offset_sides = 0
 csgo_game_res = (1024,768) # this is 4x3, windowed and down sized slightly
 # btw mouse we use is 2.54 sensitivity, w raw input off
 

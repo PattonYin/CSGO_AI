@@ -15,27 +15,11 @@ from video_input.screen_input import grab_window, resolution
 
 xy_tuning = [-28, +39]
 
-def aiming(result):
-    keypoints = result.keypoints.xy
-    if tensor_check.is_empty_and_matches(keypoints):
-        ("No agent identified")
-        return
-    
-    for person_keypoints in keypoints:
-        count = 0
-        for x in person_keypoints:
-            if x[0] == 0.0 and x[1] == 0.0:
-                count += 1  
-        if count > 7:
-            print("No agent identified")
-            continue
-        else:
-            print("agent identified")
-            x_target = person_keypoints[3][0]+xy_tuning[0]
-            y_target = person_keypoints[3][1]+xy_tuning[1]
-            print(f"attempting to flick to {x_target}, {y_target}")
-            pyautogui.moveTo(x_target, y_target)
-
+# ----------------------------------- # 
+# ----------------------------------- # 
+# ------Screen Capture Section ------ # 
+# ----------------------------------- # 
+# ----------------------------------- # 
 def screen_capture(resolution=resolution, fps=10):
     process_interval = 1/fps
     hwin = win32gui.FindWindow(None,'Counter-Strike 2') 
@@ -73,11 +57,39 @@ def screen_capture(resolution=resolution, fps=10):
     print('fps',np.round(fps,2))
     return
 
+# ----------------------------------- # 
+# ----------------------------------- # 
+# ----------Aiming Section ---------- # 
+# ----------------------------------- # 
+# ----------------------------------- # 
+def aiming(result):
+    keypoints = result.keypoints.xy
+    if tensor_check.is_empty_and_matches(keypoints):
+        ("No agent identified")
+        return
+    
+    for person_keypoints in keypoints:
+        count = 0
+        for x in person_keypoints:
+            if x[0] == 0.0 and x[1] == 0.0:
+                count += 1  
+        if count > 7:
+            print("No agent identified")
+            continue
+        else:
+            print("agent identified")
+            x_target = person_keypoints[3][0]+xy_tuning[0]
+            y_target = person_keypoints[3][1]+xy_tuning[1]
+            print(f"attempting to flick to {x_target}, {y_target}")
+            pyautogui.moveTo(x_target, y_target)
 
 def on_press_flick(key):
     try:
         if key.char == 'f':  # Check if the pressed key is 'f'
-            flick()
+            img = cv2.imread("video_input/temp/temp_02.jpg")
+            results = model(img)
+            for result in results:
+                aiming(result)
     except AttributeError:
         print(f'Special key {key} pressed')
 
@@ -85,13 +97,7 @@ def on_release(key):
     print(f'Key {key} released')
     # Stop listener
     if key == keyboard.Key.esc:
-        return False
-
-def flick():
-    img = cv2.imread("video_input/temp/temp_02.jpg")
-    results = model(img)
-    for result in results:
-        aiming(result)
+        return False    
         
 def auto_aim():
     """
@@ -102,6 +108,12 @@ def auto_aim():
             on_release=on_release) as listener:
         listener.join()
         
+        
+# ----------------------------------- # 
+# ----------------------------------- # 
+# ------Load model & threading ------ # 
+# ----------------------------------- # 
+# ----------------------------------- # 
 model = YOLO('pose_identification/models/YOLOv8l-pose.pt')
 print("model loaded")
 
@@ -114,6 +126,7 @@ def run():
     t1.join()
     t2.join()
     
+
 
 if __name__ == "__main__":
     # screen_capture()

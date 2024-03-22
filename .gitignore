@@ -3,8 +3,7 @@ Counter-Strike_Behavioural_Cloning/
 video_input/screenshots/
 
 # Data
-pose_identification/data_0/
-pose_identification/data_01/
+pose_identification/data_*/
 data/
 
 # Models

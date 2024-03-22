@@ -4,6 +4,8 @@ import numpy as np
 import win32gui, win32ui, win32con, win32api
 import time
 import matplotlib.pyplot as plt
+from ultralytics import YOLO
+import pyautogui
 
 import sys, os
 import mss
@@ -12,6 +14,8 @@ sys.path.append('.')
 
 # from config import *
 from config import csgo_img_dimension, IS_CONTRAST
+
+resolution=(1280,720)
 
 def grab_window(hwin, game_resolution=(1024,768), SHOW_IMAGE=False):
     '''
@@ -56,9 +60,9 @@ def grab_window(hwin, game_resolution=(1024,768), SHOW_IMAGE=False):
     # much more efficient not to grab it in the first place
     # rather than crop out later
     # this stage can be a bit of a bottle neck
-    offset_height_top = 135 
-    offset_height_bottom = 135 
-    offset_sides = 100 # ignore this many pixels on sides, 
+    offset_height_top = 0 
+    offset_height_bottom = 130 
+    offset_sides = 0 # ignore this many pixels on sides, 
     width = game_resolution[0] - 2*offset_sides
     height = game_resolution[1]-offset_height_top-offset_height_bottom
 
@@ -155,5 +159,6 @@ def fps_capture_test():
 
 if __name__ == "__main__":
     fps_capture_test()
+    
 
 

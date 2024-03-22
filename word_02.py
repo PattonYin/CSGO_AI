@@ -12,14 +12,17 @@ import torch
 from utils import tensor_check
 from video_input.screen_input import grab_window, resolution
 
-xy_tuning = [-28, +39]
+xy_tuning_01 = [-20, +40]
+xy_tuning_02 = [1, 1]
+fps = 10
+model_path = 'pose_identification/models/YOLOv8l-pose.pt'
 
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ------Screen Capture Section ------ # 
 # ----------------------------------- # 
 # ----------------------------------- # 
-def screen_capture(resolution=resolution, fps=10):
+def screen_capture(resolution=resolution, fps=fps):
     process_interval = 1/fps
     hwin = win32gui.FindWindow(None,'Counter-Strike 2') 
     last_time = time.time()
@@ -48,22 +51,17 @@ def screen_capture(resolution=resolution, fps=10):
                 break
 
     cv2.destroyAllWindows()
-
-    time_end = time.time()
-    avg_time = (time_end-time_start)/n_grabs
-    fps = 1/avg_time
-    print('avg_time',np.round(avg_time,5))
-    print('fps',np.round(fps,2))
     return
-
-
 
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ----------Aiming Section ---------- # 
 # ----------------------------------- # 
 # ----------------------------------- # 
-def aiming(result):
+def aim_at_target(x_target, y_target):
+    mouse.position = (x_target, y_target)
+
+def identify_target(result):
     keypoints = result.keypoints.xy
     if tensor_check.is_empty_and_matches(keypoints):
         ("No agent identified")
@@ -79,10 +77,10 @@ def aiming(result):
             continue
         else:
             print("agent identified")
-            x_target = person_keypoints[3][0]+xy_tuning[0]
-            y_target = person_keypoints[3][1]+xy_tuning[1]
+            x_target = person_keypoints[3][0]+xy_tuning_01[0]
+            y_target = person_keypoints[3][1]+xy_tuning_01[1]
             print(f"attempting to flick to {x_target}, {y_target}")
-            mouse.position = (x_target, y_target)
+            aim_at_target(x_target, y_target)
 
 def on_press_flick(key):
     try:
@@ -90,7 +88,7 @@ def on_press_flick(key):
             img = cv2.imread("video_input/temp/temp_02.jpg")
             results = model(img)
             for result in results:
-                aiming(result)
+                identify_target(result)
     except AttributeError:
         print(f'Special key {key} pressed')
 
@@ -114,7 +112,7 @@ def auto_aim():
 # ----------------------------------- # 
 # ----------------------------------- # 
 mouse = mouse.Controller()
-model = YOLO('pose_identification/models/YOLOv8l-pose.pt')
+model = YOLO(model_path)
 print("model loaded")
 
 def run():
@@ -127,5 +125,4 @@ def run():
     t2.join()
     
 if __name__ == "__main__":
-    # screen_capture()
     run()

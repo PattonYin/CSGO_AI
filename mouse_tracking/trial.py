@@ -1,5 +1,6 @@
 from pynput import mouse, keyboard
 import time
+import os
 
 # This flag is used to control the termination of both listeners
 stop_listeners = False
@@ -11,17 +12,23 @@ is_recording = False
 start_key = keyboard.Key.f2  # Start recording when F2 is pressed
 stop_key = keyboard.Key.f3   # Stop recording when F3 is pressed
 
-file_name = "input_tracking.txt"
+folder_name = "mouse_tracking/sample/flicks"
+index = len(os.listdir(folder_name))+1
+file_name = f"{folder_name}/{index}.txt"
 
 def on_move(x, y):
     print(f"Mouse moved to ({x}, {y}) at timestamp {time.time()}")
     if is_recording:
+        index = len(os.listdir(folder_name))+1
+        file_name = f"{folder_name}/{index}.txt"
         # Save the coordinates to a file
         with open(file_name, "a") as file:
             file.write(f"mouse,{x},{y},{time.time()}\n")
 
 def on_click(x, y, button, pressed):
     if is_recording:
+        index = len(os.listdir(folder_name))+1
+        file_name = f"{folder_name}/{index}.txt"
         action = "pressed" if pressed else "released"
         print(f"Mouse {action} at ({x}, {y}) with {button} at timestamp {time.time()}")
         with open(file_name, "a") as file:
@@ -31,8 +38,10 @@ def on_press(key):
     global is_recording
     print(f"Key {key} pressed at timestamp {time.time()}")
     if key == start_key:
+        index = len(os.listdir(folder_name))+1
+        file_name = f"{folder_name}/{index}.txt"
         is_recording = True
-        print("Started recording data...")
+        print(f"Started recording data...")
     elif key == stop_key:
         is_recording = False
         print("Stopped recording data...")

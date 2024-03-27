@@ -16,13 +16,15 @@ xy_tuning_01 = [-20, +40]
 xy_tuning_02 = [1, 1]
 fps = 10
 model_path = 'pose_identification/models/YOLOv8l-pose.pt'
+time_stamp = time.time()
+save_path_img_raw = "data/aim_training/1/img_raw"
 
 # ----------------------------------- # 
 # ----------------------------------- # 
 # ------Screen Capture Section ------ # 
 # ----------------------------------- # 
 # ----------------------------------- # 
-def screen_capture(resolution=resolution, fps=fps):
+def screen_capture(resolution=resolution, fps=fps, save=False, save_path=save_path_img):
     process_interval = 1/fps
     hwin = win32gui.FindWindow(None,'Counter-Strike 2') 
     last_time = time.time()
@@ -42,8 +44,11 @@ def screen_capture(resolution=resolution, fps=fps):
                 scale=1
                 dim = (int(img_small.shape[1]*scale),int(img_small.shape[0]*scale))
                 resized = cv2.resize(img_small, dim, interpolation = cv2.INTER_AREA)
+                time_stamp = time.time()
                 cv2.imshow("result", resized)
                 cv2.imwrite("video_input/temp/temp_02.jpg", resized)
+                if save:
+                    cv2.imwrite(f"{save_path}/{time_stamp}.jpg", resized)
                 
             # Quite loop if 'o' is pressed
             if cv2.waitKey(1) & 0xFF == ord('o'):
@@ -66,7 +71,7 @@ def identify_target(result):
     if tensor_check.is_empty_and_matches(keypoints):
         ("No agent identified")
         return
-    
+        
     for person_keypoints in keypoints:
         count = 0
         for x in person_keypoints:

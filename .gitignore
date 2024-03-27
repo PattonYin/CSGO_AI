@@ -1,14 +1,15 @@
 # ancestors' work
-Counter-Strike_Behavioural_Cloning/
-video_input/screenshots/
+ancestors_work/*
+awpy*
 
 # Data
 pose_identification/data_*/
-data/
-video_input/temp/
-
+data/*
+video_input/temp/*
+video_input/screenshots/*
+demo_analysis/demo/*
 # Models
-pose_identification/models/
+pose_identification/models/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

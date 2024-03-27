@@ -12,25 +12,17 @@ is_recording = False
 start_key = keyboard.Key.f2  # Start recording when F2 is pressed
 stop_key = keyboard.Key.f3   # Stop recording when F3 is pressed
 
-folder_name = "mouse_tracking/sample/flicks"
-index = len(os.listdir(folder_name))+1
-file_name = f"{folder_name}/{index}.txt"
-
 def on_move(x, y):
     print(f"Mouse moved to ({x}, {y}) at timestamp {time.time()}")
     if is_recording:
-        index = len(os.listdir(folder_name))+1
-        file_name = f"{folder_name}/{index}.txt"
         # Save the coordinates to a file
         with open(file_name, "a") as file:
             file.write(f"mouse,{x},{y},{time.time()}\n")
 
 def on_click(x, y, button, pressed):
+    action = "pressed" if pressed else "released"
+    print(f"Mouse {action} at ({x}, {y}) with {button} at timestamp {time.time()}")
     if is_recording:
-        index = len(os.listdir(folder_name))+1
-        file_name = f"{folder_name}/{index}.txt"
-        action = "pressed" if pressed else "released"
-        print(f"Mouse {action} at ({x}, {y}) with {button} at timestamp {time.time()}")
         with open(file_name, "a") as file:
             file.write(f"mouse,{x},{y},{button},{action},{time.time()}\n")
 
@@ -38,8 +30,6 @@ def on_press(key):
     global is_recording
     print(f"Key {key} pressed at timestamp {time.time()}")
     if key == start_key:
-        index = len(os.listdir(folder_name))+1
-        file_name = f"{folder_name}/{index}.txt"
         is_recording = True
         print(f"Started recording data...")
     elif key == stop_key:
@@ -55,7 +45,9 @@ def on_release(key):
         with open(file_name, "a") as file:
             file.write(f"key,{key},released,{time.time()}\n")
 
-if __name__ == "__main__":
+def collect(path="data/aim_training/1/mouse_keyboard/mouse_keyboard_input.txt"):
+    global file_name 
+    file_name = path
     # Start the mouse listener to handle mouse events
     mouse_listener = mouse.Listener(on_move=on_move, on_click=on_click)
     mouse_listener.start()
@@ -74,3 +66,19 @@ if __name__ == "__main__":
     # Stop the listeners
     mouse_listener.stop()
     keyboard_listener.stop()
+    
+def test_mouse():
+    mouse_listener = mouse.Listener(on_move=on_move, on_click=on_click)
+    mouse_listener.start()
+    try:
+        while not stop_listeners:
+            time.sleep(0.1)  # Small delay to prevent busy waiting
+    except KeyboardInterrupt:
+        pass  # Allow manual interruption with CTRL+C
+
+    # Stop the listeners
+    mouse_listener.stop()
+
+if __name__ == "__main__":
+    collect()
+    

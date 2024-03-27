@@ -17,6 +17,45 @@ from config import csgo_img_dimension, IS_CONTRAST
 
 resolution=(1280,720)
 
+fps = 10
+
+time_stamp = time.time()
+save_path_img_raw = "data/aim_training/1/img_raw"
+
+def screen_capture(resolution=resolution, fps=fps, save=False, save_path=save_path_img_raw):
+    process_interval = 1/fps
+    hwin = win32gui.FindWindow(None,'Counter-Strike 2') 
+    last_time = time.time()
+    while True:
+        current_time = time.time()
+        if current_time - last_time > process_interval:
+            img_small = grab_window(hwin, game_resolution=resolution, SHOW_IMAGE=False)
+            last_time = current_time
+            
+            if True:
+                # because we use a shrunk image for input into the NN
+                # we kind of want to make it larger so we can see what's happening
+                # of course it's lossy compared to the original game
+                target_width = 800
+                scale = target_width / img_small.shape[1] # how much to magnify
+                dim = (target_width,int(img_small.shape[0] * scale))
+                scale=1
+                dim = (int(img_small.shape[1]*scale),int(img_small.shape[0]*scale))
+                resized = cv2.resize(img_small, dim, interpolation = cv2.INTER_AREA)
+                time_stamp = time.time()
+                cv2.imshow("result", resized)
+                cv2.imwrite("video_input/temp/temp_02.jpg", resized)
+                if save:
+                    cv2.imwrite(f"{save_path}/{time_stamp}.jpg", resized)
+                
+            # Quite loop if 'o' is pressed
+            if cv2.waitKey(1) & 0xFF == ord('o'):
+                cv2.destroyAllWindows()
+                break
+
+    cv2.destroyAllWindows()
+    return
+
 def grab_window(hwin, game_resolution=(1024,768), SHOW_IMAGE=False):
     '''
     -- Inputs --

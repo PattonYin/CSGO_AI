@@ -1,14 +1,18 @@
 # ancestors' work
 Counter-Strike_Behavioural_Cloning/
-video_input/screenshots/
+video_input/screenshots/*
 
 # Data
 pose_identification/data_*/
-data/
-video_input/temp/
+data/*
+video_input/temp/*
+demo_analysis/demo/*
 
 # Models
-pose_identification/models/
+pose_identification/models/*
+
+# Attempts that didn't work
+demo_analysis/demo_golang/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

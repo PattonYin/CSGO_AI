@@ -1,0 +1,9 @@
+path: X:\code\CSGO_AI\data\Player_identification\dataset_1
+train: train\images
+val: valid\images
+
+names: 
+  0: CTbody
+  1: CThead
+  2: Tbody
+  3: Thead

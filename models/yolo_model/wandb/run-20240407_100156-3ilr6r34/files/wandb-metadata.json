@@ -1,0 +1,53 @@
+{
+    "os": "Windows-10-10.0.22631-SP0",
+    "python": "3.11.8",
+    "heartbeatAt": "2024-04-07T14:01:59.478744",
+    "startedAt": "2024-04-07T14:01:56.191379",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "x:\\code\\CSGO_AI\\models\\yolo_model\\train.py",
+    "codePathLocal": "train.py",
+    "codePath": "models\\yolo_model\\train.py",
+    "git": {
+        "remote": "https://github.com/PattonYin/CSGO_AI.git",
+        "commit": "140a77b2906064db154d311eed41afc4d31fcbcc"
+    },
+    "email": "pyin@wesleyan.edu",
+    "root": "X:/code/CSGO_AI",
+    "host": "meticulously",
+    "username": "PattonYin",
+    "executable": "X:\\conda_environment\\CSGO_AI\\python.exe",
+    "cpu_count": 8,
+    "cpu_count_logical": 16,
+    "cpu_freq": {
+        "current": 3040.0,
+        "min": 0.0,
+        "max": 3801.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3040.0,
+            "min": 0.0,
+            "max": 3801.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 931.3164024353027,
+            "used": 690.3310775756836
+        }
+    },
+    "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+            "memory_total": 8585740288
+        }
+    ],
+    "memory": {
+        "total": 31.192249298095703
+    }
+}

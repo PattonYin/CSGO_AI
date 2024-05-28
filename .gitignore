@@ -8,6 +8,12 @@ data/*
 video_input/temp/*
 demo_analysis/demo/*
 
+# log files
+models/yolo_model/wandb/*
+
+# book
+others/paper/RLbook2020.pdf
+
 # Models
 pose_identification/models/*
 

@@ -1,6 +1,9 @@
-from data_preperator import Processor
+from data_preperator import *
 import pickle
-from plot_data import *
+import os
+from plot_module import *
+from tqdm import tqdm
+from config import *
 
 columns_to_checkout = ['life_state', 'move_collide', 'move_type', 'next_attack_time', 'ducking', 'spotted', 'is_walking', 'is_defusing', 'flash_duration', 'is_strafing']
 
@@ -12,8 +15,9 @@ params = dict(
     columns = ["pitch", "yaw", "X", "Y", "Z", "shots_fired", "team_num"]
 )
 
-def plot_player_fire_data():
-    
+def visualize_player_fire_data():
+    """Plots the player's position and orientation at the fire tick
+    """
     processor = Processor(params["demo_path"])
     data = processor.get_round_data(props=params['columns'])
 
@@ -37,8 +41,12 @@ def plot_player_fire_data():
 
     plot_tick(tick_sample_all_data, data_all=data)
 
-
 def anime_player_movements(tick_rate=64):
+    """Animates the player movement in a round
+
+    Args:
+        tick_rate (int, optional): The frame rate of the animation. Defaults to 64.
+    """
     processor = Processor(params["demo_path"])
     data = processor.get_round_data(props=params['columns'])
 
@@ -47,16 +55,53 @@ def anime_player_movements(tick_rate=64):
     plot_move(round_1_data, tick_rate=tick_rate)
 
 
-def plot_all_player_movements():
+def visualize_all_player_movements():
     print(f"max x: {max(data['X'])}")
     print(f"min x: {min(data['X'])}")
     print(f"max y: {max(data['Y'])}")
     print(f"min y: {min(data['Y'])}")
     plot_positions(data)
 
+def visualize_win_rate(folder_dir='demo_analysis/demo/de_dust2', area_todo=None):
+    """
+    Currently scraped May 28th and 27th demo data
+    
+    """
+    demo_paths = os.listdir(folder_dir)
+    death_dfs = []
+    for demo in tqdm(demo_paths, desc="Processing demos"):    
+        processor = Gun_Fight_Analysis(os.path.join(folder_dir, demo))
+        death_df = processor.query_death_df()
+        death_dfs.append(death_df)
+    win_rate = processor.win_rate_of_fights(death_dfs, area_todo)
+    plot_pixel_map(win_rate, 100, title="win_rate_01")
+    
+
+def visualize_gun_fight_histories(folder_dir, area_todo=None):
+    demo_paths = os.listdir(folder_dir)[:5]
+    death_dfs = []
+    for demo in tqdm(demo_paths, desc="Processing demos"):    
+        processor = Gun_Fight_Analysis(os.path.join(folder_dir, demo))
+        death_df = processor.query_death_df()
+        death_dfs.append(death_df)
+    dead_count = processor.num_death_on_map(death_dfs, area_todo)
+    plot_pixel_map(dead_count, 100, title="dead_count_01")
+    
+def case_study_aim_speed():
+    demo_path_case = r"X:\code\CSGO_AI\demo_analysis\demo\demos_extracted\de_dust2\g2-vs-vitality-m1-dust2.dem"
+    processor = Aim_Analysis(demo_path_case)
+    processor.aim_speed_case_study()
+
 if __name__ == '__main__':
     # print(round_1_data.head())
 
-    # plot_player_fire_data()
-    anime_player_movements(64)
-    # plot_all_player_movements()
+    # visualize_player_fire_data()
+    # anime_player_movements(64)
+    # visualize_all_player_movements()
+    
+    # folder_dir = r"X:\code\CSGO_AI\demo_analysis\demo\demos_extracted\de_dust2"
+    # area_todo = ((500, max_x), (200, 1500))
+    # visualize_win_rate(folder_dir, area_todo)
+    # visualize_gun_fight_histories(folder_dir)
+    
+    case_study_aim_speed()

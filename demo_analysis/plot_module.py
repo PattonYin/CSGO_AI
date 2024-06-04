@@ -3,14 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.animation import FuncAnimation
+from matplotlib.colors import Normalize
+from scipy.stats import zscore
 
-max_x = 1787.9722900390625
-min_x = -2185.96875
-max_y = 3098.52978515625
-min_y = -997.5834350585938
-
-min_y = -1030
-max_x = 1900
+from config import *
 
 def plot_positions(data: pd.DataFrame, map_name=None):
     
@@ -83,4 +79,35 @@ def plot_move(data: pd.DataFrame, tick_rate=32, map_name=None, data_all=None):
     
     ani = FuncAnimation(fig, update, frames=list(range(1,(data.tick.nunique()//tick_rate))),
                         init_func=init, blit=True)
+    plt.show()
+    
+def plot_pixel_map(data: dict, side_length, title="Visualization"):
+
+    step_x = step_y = side_length
+
+    grid_x = (max_x - min_x) // step_x + 1
+    grid_y = (max_y - min_y) // step_y + 1
+    value_array = []
+
+    grid = np.full((grid_y, grid_x), np.nan)
+    for (x, y), value in data.items():
+        idx_x = (x - min_x) // step_x
+        idx_y = (y - min_y) // step_y
+        if value is not None:
+            value_array.append(value)
+            grid[idx_y, idx_x] = value
+
+    valid_mask = ~np.isnan(grid)
+    grid[valid_mask] = zscore(grid[valid_mask])
+
+    fig, ax = plt.subplots()
+    cmap = plt.get_cmap('Blues')  
+    cmap.set_bad(color='grey') 
+    
+    cax = ax.imshow(grid, interpolation='nearest', cmap=cmap, origin='lower', extent=(min_x, max_x, min_y, max_y))
+    cbar = fig.colorbar(cax, ax=ax, orientation='vertical')
+    cbar.set_label('Standardized Value')
+    plt.title(title)
+    plt.xlabel('X coordinate')
+    plt.ylabel('Y coordinate')
     plt.show()

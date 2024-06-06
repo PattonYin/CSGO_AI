@@ -21,7 +21,7 @@ def plot_positions(data: pd.DataFrame, map_name=None):
 
 def plot_tick(data: pd.DataFrame, map_name=None, data_all=None):
     
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(10, 10))
     
     if map_name is not None:
         map_img = mpimg.imread(f'demo_analysis/radar_maps/{map_name}.png')
@@ -43,6 +43,7 @@ def plot_tick(data: pd.DataFrame, map_name=None, data_all=None):
 
         # Draw the line from the player's position (X, Y) to the calculated point (X + dx, Y + dy)
         ax.arrow(row['X'], row['Y'], dx, dy, head_width=0.1*scale, head_length=0.2*scale, fc='red', ec='red')
+        ax.text(row['X'], row['Y'], f"{row['pitch']:.2f}, {row['yaw']:.2f}", fontsize=8, color='black')
 
     ax.set_xlabel('X Position')
     ax.set_ylabel('Y Position')

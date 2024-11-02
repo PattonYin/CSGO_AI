@@ -7,6 +7,8 @@ pose_identification/data_*/
 data/*
 video_input/temp/*
 demo_analysis/demo/*
+demo_analysis/intermediate_data/model_training/*
+demo_analysis/intermediate_data/model_training_sequence/*
 
 # log files
 models/yolo_model/wandb/*

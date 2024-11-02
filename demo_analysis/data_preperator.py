@@ -6,11 +6,59 @@ from io import StringIO
 
 from config import *
 
-class Processor:
+class Processor_Core:
     def __init__(self, path="demo_analysis/demo/match730_003673760416913162325_1520768583_129.dem"):
         self.parser = DemoParser(path)
         self.tick_rate = 64
     
+class Processor_Efficient(Processor_Core):
+    """This is designed for model training
+
+    """
+    def __init__(self, path="demo_analysis/demo/match730_003673760416913162325_1520768583_129.dem", tick_range=16*3):
+        super().__init__(path)
+        self.tick_range = tick_range
+        
+    def ticks_for_training(self, fixed_range=False):
+        """Collects the ticks for training the model
+
+        Returns:
+            tick_ranges (list (tuple)): list of tick ranges for training
+            attacker (list (str)): list of attackers
+            attackees (list (str)): list of attackees
+        """
+        death_df = self.parser.parse_event("player_death")
+        death_ticks = death_df['tick'].values.tolist()
+        attackers = death_df['attacker_name'].values.tolist()
+        attackees = death_df['user_name'].values.tolist()
+        tick_ranges = []
+        
+        if fixed_range:
+            for death_tick in death_ticks:
+                tick_ranges.append((death_tick - self.tick_range, death_tick))
+        else:
+            weapon_fire_df = self.parser.parse_event("weapon_fire")
+
+            for index, death_tick in enumerate(death_ticks):
+                fire_df = weapon_fire_df[(weapon_fire_df['tick'] >= death_tick - self.tick_range) & (weapon_fire_df['tick'] <= death_tick)]
+                fire_df = fire_df[(fire_df['user_name'] == attackees[index]) | (fire_df['user_name'] == attackers[index])]
+
+                if len(fire_df) == 0:
+                    continue
+                fire_tick = fire_df['tick'].values.tolist()[0]
+                tick_ranges.append((fire_tick, death_tick))
+                
+        print("tick_ranges ready")
+        return tick_ranges, attackers, attackees
+
+        
+
+        
+    
+class Processor(Processor_Core):
+    """This is designed for data analysis
+
+    """
     def get_round_ticks(self):
         """Returns the start ticks and end ticks for a game
         
@@ -84,6 +132,31 @@ class Processor:
         weapon_fire_df = self.parser.parse_event("weapon_fire", player=["X", "Y"])
         return weapon_fire_df
     
+    def query_bomb_plant_info(self):
+        """Returns the information associated with the bomb
+
+        Returns:
+            _type_: _description_
+        """
+        bomb_df = self.parser.parse_event('bomb_planted')
+        return bomb_df
+    
+    def query_flash_info(self):
+        """
+        ['entityid', 'tick', 'user_X', 'user_Y', 'user_Z', 'user_name',
+       'user_steamid', 'x', 'y', 'z']
+        """
+        flash_df = self.parser.parse_event('flashbang_detonate', player=["team_num"])
+        return flash_df
+    
+    def query_smoke_info(self):
+        """
+        ['entityid', 'tick', 'user_X', 'user_Y', 'user_Z', 'user_name',
+       'user_steamid', 'x', 'y', 'z']
+        """
+        smoke_df = self.parser.parse_event('smokegrenade_detonate', player=["team_num"])
+        return smoke_df
+        
     def query_blind_df(self):
         """
         ['attacker_X', 'attacker_Y', 'attacker_name', 'attacker_steamid',
@@ -97,8 +170,7 @@ class Processor:
     
     def query_ticks_df(self):
         pass
-
-class Gun_Fight_Analysis(Processor):        
+    
     def generate_pixel_map(self, side_length=50):
         """
         Generates a pixel map of the game area
@@ -115,186 +187,43 @@ class Gun_Fight_Analysis(Processor):
         square_dict = {square_id: 0 for square_id in square_ids}
         return square_dict
     
-    def win_rate_of_fights(self, datas, area_togo=None):
+    def generate_pixel_map_to_pixel_map(self, side_length=50):
         """
-        Computes the win rate of gunfights on the basis of location of attacker on the map
+        Generates a pixel map of the game area, where each value in the dict is also a pixel map
         
-        How to determine a fight:
-        Factors considered:
-        - A player dies
-        
-        Factors not yet considered:
-        - HP of players
-        - Weapons of players
-        - Blind or not
-        - Smoked or not
-
-        The unit of location:
-        square of size 50x50
-
-        Possible_nextStep:
-        Use NN to learn the gunfight win rate on the continuous level
-
         Args:
-            datas (list): list of dataframes to be processed
-                the dataframe has to be the output from 
-                    `parser.parse_event("player_death")`
-            area_togo: e.g. ((min_x, max_x), (min_y, max_y))
+            side_length (int): the side length of the pixel map
+            
+        Returns:
+            pixel_map (dict): a dictionary of the pixel map
         """
-        side_length = 100
-        fight_count = self.generate_pixel_map(side_length=side_length)
-        win_count = self.generate_pixel_map(side_length=side_length)
-        square_ids = fight_count.keys()
-        
-        for data in datas:
-            for index in range(len(data)):
-                if (data.iloc[index]['attackerblind'] == True 
-                    or data.iloc[index]['thrusmoke'] == True):
-                    continue
-                
-                if area_togo is not None:
-                    att_true_x = data.iloc[index]['attacker_X']
-                    att_true_y = data.iloc[index]['attacker_Y']
-                    dead_true_x = data.iloc[index]['user_X']
-                    dead_true_y = data.iloc[index]['user_Y']
-                    
-                    if att_true_x < area_togo[0][0] or att_true_x > area_togo[0][1] or att_true_y < area_togo[1][0] or att_true_y > area_togo[1][1]:
-                        continue
-                    if dead_true_x < area_togo[0][0] or dead_true_x > area_togo[0][1] or dead_true_y < area_togo[1][0] or dead_true_y > area_togo[1][1]:
-                        continue
-                    
-                attacker_x = (att_true_x // side_length * side_length)
-                attacker_y = (att_true_y // side_length * side_length)
+        x_coords = list(range(min_x, max_x+1, side_length))
+        y_coords = list(range(min_y, max_y+1, side_length))
+        square_ids = [(x, y) for x in x_coords for y in y_coords]
+        square_dict = {square_id: {} for square_id in square_ids}
+        return square_dict
 
-                dead_x = (dead_true_x // side_length * side_length)
-                dead_y = (dead_true_y // side_length * side_length)
-                
-                try:
-                    attacker_coord = (int(attacker_x), int(attacker_y))
-                    dead_coord = (int(dead_x), int(dead_y))
-                except ValueError:
-                    # print(attacker_x, attacker_y)
-                    # print(dead_x, dead_y)
-                    continue    
-                
-                if attacker_coord not in square_ids:
-                    print(data.iloc[index]['attacker_X'])
-                    print(data.iloc[index]['attacker_Y'])
-                
-                
-                win_count[attacker_coord] += 1
-                fight_count[attacker_coord] += 1
-                fight_count[dead_coord] += 1
-                
-        win_rate = {}
-        
-        for square_id in square_ids:
-            if fight_count[square_id] == 0:
-                win_rate[square_id] = None
-            else:
-                win_rate[square_id] = win_count[square_id]/fight_count[square_id]
-                
-        return win_rate
-    
-    def num_death_on_map(self, datas, area_togo=None):
-        side_length = 100
-        
-        dead_count = self.generate_pixel_map(side_length=side_length)
-        square_ids = dead_count.keys()
-        
-        for data in datas:
-            for index in range(len(data)):
-                # if (data.iloc[index]['attackerblind'] == True 
-                #     or data.iloc[index]['thrusmoke'] == True):
-                #     continue
-                dead_true_x = data.iloc[index]['user_X']
-                dead_true_y = data.iloc[index]['user_Y']
-                
-                if area_togo is not None:                    
-                    if dead_true_x < area_togo[0][0] or dead_true_x > area_togo[0][1] or dead_true_y < area_togo[1][0] or dead_true_y > area_togo[1][1]:
-                        continue
 
-                dead_x = (dead_true_x // side_length * side_length)
-                dead_y = (dead_true_y // side_length * side_length)
-                
-                try:
-                    dead_coord = (int(dead_x), int(dead_y))
-                except ValueError:
-                    continue                   
-
-                dead_count[dead_coord] += 1
-                
-        return dead_count
-                
-                
-class Aim_Analysis(Processor):
-    def aim_speed_case_study(self):
-        # Constants
-        sample_idx = 20
-        tick_range = 100 # 100 ticks before the death event
-        dyaw_lim = (-500, 500)
-        dpitch_lim = (-1, 1)
-        props_to_query = ["pitch", "yaw", "X", "Y", "Z"]
+    def data_to_pixel_map(self, data, side_length=50):
+        """
+        Converts the data to pixel map
         
-        dval = True
+        Args:
+            data (pd.DataFrame): the data to be converted to pixel map
+            side_length (int): the side length of the pixel map
+            
+        Returns:
+            pixel_map (dict): a dictionary of the pixel map
+        """
+        pixel_map = self.generate_pixel_map(side_length)
+        for index, row in data.iterrows():
+            x = row['x']
+            y = row['y']
+            x = x - (x % side_length)
+            y = y - (y % side_length)
+            pixel_map[(x, y)] += 1
         
-        # step 1. Find an event of death
-        data = self.query_death_df()
-        
-        attacker_name = data.iloc[sample_idx]['attacker_name']
-        attackee_name = data.iloc[sample_idx]['user_name']
-        tick_sample = data.iloc[sample_idx]['tick']
-        
-        ticks = self.get_ticks(tick_sample-tick_range, tick_sample, props_to_query)
-        
-        fire_df = self.query_weapon_fire_df()
-        fire_df = fire_df[(fire_df["tick"] >= tick_sample-tick_range) & (fire_df["tick"] <= tick_sample)]
-        attacker_fire_df = fire_df[fire_df['user_name'] == f'{attacker_name}']
-        attackee_fire_df = fire_df[fire_df['user_name'] == f'{attackee_name}']
-        
-        attacker_fire_ticks = attacker_fire_df.tick.tolist()
-        attackee_fire_ticks = attackee_fire_df.tick.tolist()
-                
-        # step 2. Compute the dyaw/dt and dpitch/dt
-        attacker_ticks = ticks[ticks['name'] == f'{attacker_name}']
-        attackee_ticks = ticks[ticks['name'] == f'{attackee_name}']
-    
-        attacker_yaw_list = attacker_ticks.yaw.tolist()
-        attacker_pitch_list = attacker_ticks.pitch.tolist()
-        attackee_yaw_list = attackee_ticks.yaw.tolist()
-        attackee_pitch_list = attackee_ticks.pitch.tolist()
-        
-        attacker_dyaw_list = np.diff(attacker_yaw_list)
-        attacker_dpitch_list = np.diff(attacker_pitch_list)
-        attackee_dyaw_list = np.diff(attackee_yaw_list)
-        attackee_dpitch_list = np.diff(attackee_pitch_list)
-
-        # step 3. Plot out the dyaw/dt and dpitch/dt
-        # Highlight fire ticks
-        def highlight_ticks(ax, data_list, fire_ticks, title, lim):
-            ax.set_ylim(lim)
-            ax.plot(data_list)
-            ax.scatter([i+100-tick_sample for i in fire_ticks], [data_list[i+100-tick_sample] for i in fire_ticks], color='red', s=40)
-            ax.set_title(title)
-        
-        # step 3. Plot out the dyaw/dt and dpitch/dt
-        if dval:
-            fig, ax = plt.subplots(2, 2, figsize=(10, 10))
-            highlight_ticks(ax[0, 0], attacker_dyaw_list, attacker_fire_ticks, "attacker_dyaw_list", dyaw_lim)
-            highlight_ticks(ax[0, 1], attacker_dpitch_list, attacker_fire_ticks, "attacker_dpitch_list", dpitch_lim)
-            highlight_ticks(ax[1, 0], attackee_dyaw_list, attackee_fire_ticks, "attackee_dyaw_list", dyaw_lim)
-            highlight_ticks(ax[1, 1], attackee_dpitch_list, attackee_fire_ticks, "attackee_dpitch_list", dpitch_lim)
-            plt.tight_layout()
-            plt.show()
-        else:
-            fig, ax = plt.subplots(2, 2, figsize=(10, 10))
-            highlight_ticks(ax[0, 0], attacker_yaw_list, attacker_fire_ticks, "attacker_yaw_list")
-            highlight_ticks(ax[0, 1], attacker_pitch_list, attacker_fire_ticks, "attacker_pitch_list")
-            highlight_ticks(ax[1, 0], attackee_yaw_list, attackee_fire_ticks, "attackee_yaw_list")
-            highlight_ticks(ax[1, 1], attackee_pitch_list, attackee_fire_ticks, "attackee_pitch_list")
-            plt.tight_layout()
-            plt.show()
-
+        return pixel_map
 
 if __name__ == "__main__":
     demo_path = "demo_analysis/demo/match730_003673760416913162325_1520768583_129.dem"

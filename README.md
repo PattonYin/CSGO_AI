@@ -42,6 +42,4 @@ All of them reached around 70% accuracy when predicting the outcome of the encou
 
 
 ## Demonstrations
-
-
-## Referenced repo (find a better name)
+![xWinRateExample](demo_analysis\slides\xWinRate_01.jpg)

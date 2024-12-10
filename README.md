@@ -38,7 +38,7 @@ So the data would be prepared in such way:
 ### Models & Performances
 I've used Logistic Regression, Random Forest, Multiple Layer Perceptrons.
 
-All of them reached around 70% accuracy when predicting the outcome of the encounter.
+All of them reached around 75% accuracy when predicting the outcome of the encounter.
 
 
 ## Demonstrations
